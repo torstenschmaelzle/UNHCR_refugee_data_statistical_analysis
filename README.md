@@ -1,128 +1,172 @@
 # UNHCR Refugee Flows – Data Science & Statistical Analysis
 
-This repository analyzes global refugee and asylum seeker flows using UNHCR data (1951–2016) enriched with World Bank indicators (population and GDP per capita).  
-The goal is to demonstrate practical data science and statistics skills on real-world, messy data: data preparation, feature engineering, exploratory analysis, visualization, hypothesis testing, and panel/regression modeling.
+This repository analyzes global refugee and asylum seeker flows using UNHCR time series data (1951–2016), enriched with World Bank indicators (population and GDP per capita). The focus is on a clean end-to-end workflow: data preparation, feature engineering, exploratory analysis, geospatial visualization, hypothesis testing, regression, and fixed-effects panel modeling.
 
-## What this shows (for recruiters)
+## What this demonstrates (for Data Science / Statistics roles)
 
-- **Data wrangling & joins:** multi-source joins (UNHCR + World Bank + GeoJSON), country name harmonization
-- **Feature engineering:** normalization to compare countries fairly (per 1,000 inhabitants)
-- **EDA & visualization:** time trends, maps, flowmaps, GIF exports
-- **Statistical reasoning:** hypothesis testing, regression, **fixed-effects panel modeling**
-- **Responsible modeling decisions:** transparent handling of missing data and outliers (see below)
+- **Data wrangling:** harmonizing country identifiers across UNHCR, World Bank, and GeoJSON sources
+- **Feature engineering:** building comparable per-capita metrics (per 1,000 inhabitants)
+- **EDA & visualization:** time trends + geospatial flow visualizations (static and animated)
+- **Statistical inference:** hypothesis testing, regression, and **fixed-effects panel models**
+- **Methodological judgment:** transparent decisions around missingness and heavy-tailed data
 
-## Quick preview (outputs)
+---
 
-### Global flow visualization
+## Quick preview of results
 
-![Global flow map 2016](Output_gifs/global_flowmap_2016.gif)
+### Flow visualizations (GIFs)
 
-### Inflow and outflow intensity
+<p float="left">
+  <img src="Output_gifs/global_flowmap_2016.gif" width="49%" />
+  <img src="Output_gifs/inflow_heatmap.gif" width="49%" />
+</p>
+<p float="left">
+  <img src="Output_gifs/outflow_heatmap.gif" width="49%" />
+</p>
 
-![Inflow heatmap](Output_gifs/inflow_heatmap.gif)
-![Outflow heatmap](Output_gifs/outflow_heatmap.gif)
+**What you’re seeing:**
+
+- The **global flow map** visualizes directed movements between origins and destinations for a selected year.
+- The **inflow/outflow heatmaps** show relative intensity of refugee movements by country.
+
+### Fixed-effects panel model outputs (PNG)
+
+<p float="left">
+  <img src="output/Panelmodell_Flüchtlingsaufnahme.png" width="49%" />
+  <img src="output/Panelmodell_Flüchtlingsabwanderung.png" width="49%" />
+</p>
+
+**Interpretation (high-level):**
+
+- **Left:** within-country changes over time in refugee _intake_ per 1,000 inhabitants.
+- **Right:** within-country changes over time in refugee _outflow_ per 1,000 inhabitants.  
+  Using fixed effects helps isolate trends **within the same country** over time, rather than mixing cross-country level differences into the estimate.
+
+---
 
 ## Core questions
 
-1. **Earlier vs. later decades:** How do refugee / asylum seeker flows change over time?
+1. **Earlier vs. later decades:** How do refugee and asylum seeker flows change over time?
 2. **Wealth and intake:** Is there an association between GDP per capita and refugee intake per capita?
+
+---
 
 ## Data sources
 
 ### UNHCR (via Kaggle, stored in `archive/`)
 
-- `time_series.csv` (main dataset, long format, 1951–2016)  
-  One row per year, destination, origin, and population type (e.g., Refugees).
-- Additional datasets used for context/EDA:
-  - `persons_of_concern.csv`
-  - `asylum_seekers.csv`
-  - `asylum_seekers_monthly.csv`
-  - `demographics.csv`
-  - `resettlement.csv`
+- `time_series.csv` (main dataset, long format, 1951–2016)
+- additional datasets for context/EDA:
+  `persons_of_concern`, `asylum_seekers`, `asylum_seekers_monthly`, `demographics`, `resettlement`
 
 ### World Bank (stored in `additional_data/`)
 
-- Population totals per country-year
-- GDP per capita per country-year
+- population totals by country-year
+- GDP per capita by country-year
+
+---
 
 ## Key metric (feature engineering)
 
-Absolute refugee counts are strongly driven by country size.  
-To make countries comparable, we compute:
+### Why we normalize
 
-**refugee_share_per_1000 = (refugees / population) \* 1000**
+Absolute refugee counts are not comparable across countries because country size dominates the level of flows. A fair comparison needs a denominator.
 
-This allows meaningful comparison across countries with very different population sizes and highlights cases where smaller countries carry high relative inflows.
+### Metric used
 
-## Methodology overview
+We compute a per-capita metric:
 
-### 1) Data preparation
+**share_per_1000 = (refugees / population) × 1000**
 
-- Cleaning and harmonizing country identifiers for joins across:
-  - UNHCR tables
-  - World Bank tables
-  - GeoJSON world geometries (for maps)
-- Aggregation of origin/destination flows by country-year
-- Geodata preparation (centroids) for flow visualization
+This makes country-year values comparable even when population sizes differ by orders of magnitude.
 
-### 2) Exploratory analysis (EDA)
+---
 
-- Coverage checks (years, countries, population types)
-- Distribution inspection (heavy tails, skewness)
-- Trend exploration by year, origin, destination
+## GDP enrichment (why and how)
 
-### 3) Visualization
+### Why add GDP per capita
 
-- Static maps and flow arrows
-- Animated flow maps and heatmaps exported as GIFs (`Output_gifs/`)
+GDP per capita is used as a broad proxy for economic capacity and living standard. The goal is not to claim causality, but to test whether there is an empirical association between relative intake and economic context.
 
-### 4) Statistical analysis
+### How we joined GDP to the flow metric
 
-- Hypothesis testing (including permutation style approaches where appropriate)
-- Linear regression for trends and simple relationships
-- **Fixed-effects panel model** to estimate within-country changes over time while controlling for time-invariant country factors
+High-level steps:
 
-## Important modeling choices (reasoning)
+1. aggregate refugee (and asylum seeker) flows by **country-year**
+2. load World Bank GDP per capita by **country-year**
+3. harmonize country identifiers (name mapping where required)
+4. merge on `(country, year)` and carry forward the computed `share_per_1000`
+5. use the merged dataset for regression / panel modeling
 
-Real-world refugee flow data is not “textbook clean.” We made decisions to avoid misleading conclusions.
+This produces datasets like:
 
-### Missing data (we did not blindly drop or impute)
+- `Destination_refugees_per_capita_with_gdp.csv`
+- `output_with_continent.csv` (for continent-based comparisons)
 
-In UNHCR flow data, missingness is often **structural** (not random), for example:
+---
 
-- origin is listed as **Various / Unknown**
-- some country-year combinations have incomplete reporting
+## Important design choices (and the reasoning)
 
-What we did:
+### Missing values
 
-- explicitly inspected missingness (`EDA/Missing_Values.ipynb`)
-- avoided naive imputation (median/mean imputation is not meaningful for origins/flows)
-- restricted certain analyses to population types/time windows where interpretation is strongest
-- used filtering only when a specific method required complete cases
+In UNHCR flow data, missingness is often **structural** and not missing at random:
 
-Why:
-Imputation can create artificial flows and bias regression/panel estimates. In this setting, preserving uncertainty is often more honest than “filling” values.
+- origins can be `Various/Unknown`
+- some country-year combinations are partially reported
+- coverage varies by dataset and period
 
-### Outliers (we did not remove them by default)
+**What we did**
 
-Refugee flows are naturally **heavy-tailed**. Large values are frequently **true signals** caused by conflicts and geopolitical shocks, not measurement errors.
+- inspected missingness explicitly (`EDA/Missing_Values.ipynb`)
+- avoided naive imputation (mean/median imputation does not make sense for origins/flows)
+- limited some analyses to population types and time windows where interpretation is strongest
+- only filtered observations when a method required complete cases
 
-What we did:
+**Why**
+Imputation can invent flows that never existed and bias downstream inference. For this domain, preserving uncertainty is more honest than filling unknowns.
 
-- no default outlier deletion
-- normalization per 1,000 inhabitants to reduce country-size effects
-- interpretation focused on robustness and context rather than forcing normality
+### Outliers
 
-Why:
-Removing outliers in this domain can remove the phenomenon we want to study. For sensitive models, the right approach is usually sensitivity checks (e.g., transforms or winsorization) rather than deleting high-impact years.
+Refugee flows are naturally **heavy-tailed** and driven by true shocks (conflicts, crises). Extreme values are often the signal.
 
-### Scope decisions
+**What we did**
 
-For interpretability of cross-border flows, the main analyses focus on:
+- did not remove outliers by default
+- relied on per-capita normalization and careful interpretation
+- preferred sensitivity thinking over deletion
+
+**Why**
+Outlier removal risks removing the most meaningful events in the data. A better approach (if needed) is robustness checks or alternative transformations, not automatic deletion.
+
+### Scope restrictions
+
+For cross-border flow interpretation, the core analyses focus on:
 
 - **Refugees** (including refugee-like situations)
 - **Asylum seekers**
 
-Groups like internally displaced persons or returnees were excluded from the main flow interpretation because they do not represent cross-border movement in the same way.
+Groups like internally displaced persons and returnees were excluded from the main flow interpretation because they do not represent cross-border movement in the same way.
+
+---
 
 ## Repository structure
+
+archive/ UNHCR datasets
+additional_data/ World Bank population and GDP per capita
+EDA/ exploratory notebooks plus missingness analysis
+Hypothesen/ hypothesis notebooks plus short READMEs
+output_csv_files/ processed tables used for maps and models
+Output_gifs/ exported animated visualizations
+output/ exported model figures
+
+Regression.ipynb regression analysis
+Panelmodell.ipynb fixed effects panel model
+Static_flowmaps.ipynb static maps
+Dynamic_Flowmaps.ipynb animated maps plus GIF export
+geodata_preperation.ipynb geodata preprocessing
+Time_Series.ipynb time series analysis
+
+## Contact
+
+Torsten Schmälzle  
+GitHub: https://github.com/torstenschmaelzle
