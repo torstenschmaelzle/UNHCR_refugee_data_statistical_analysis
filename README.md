@@ -33,8 +33,6 @@ This repository analyzes global refugee and asylum seeker flows using UNHCR time
 - **Right:** within-country changes over time in refugee _outflow_ per 1,000 inhabitants.  
   Using fixed effects helps isolate trends **within the same country** over time, rather than mixing cross-country level differences into the estimate.
 
----
-
 ## Core questions
 
 1. **Earlier vs. later decades:** How do refugee and asylum seeker flows change over time?
@@ -55,8 +53,6 @@ This repository analyzes global refugee and asylum seeker flows using UNHCR time
 - population totals by country-year
 - GDP per capita by country-year
 
----
-
 ## Key metric (feature engineering)
 
 ### Why we normalize
@@ -70,8 +66,6 @@ We compute a per-capita metric:
 **share_per_1000 = (refugees / population) × 1000**
 
 This makes country-year values comparable even when population sizes differ by orders of magnitude.
-
----
 
 ## GDP enrichment (why and how)
 
@@ -93,8 +87,6 @@ This produces datasets like:
 
 - `Destination_refugees_per_capita_with_gdp.csv`
 - `output_with_continent.csv` (for continent-based comparisons)
-
----
 
 ## Important design choices (and the reasoning)
 
@@ -138,26 +130,26 @@ For cross-border flow interpretation, the core analyses focus on:
 
 Groups like internally displaced persons and returnees were excluded from the main flow interpretation because they do not represent cross-border movement in the same way.
 
----
-
 ## Repository structure
 
-archive/ UNHCR datasets
-additional_data/ World Bank population and GDP per capita
-EDA/ exploratory notebooks plus missingness analysis
-Hypothesen/ hypothesis notebooks plus short READMEs
-output_csv_files/ processed tables used for maps and models
-Output_gifs/ exported animated visualizations
-output/ exported model figures
+```text
+archive/                 UNHCR datasets (raw)
+additional_data/         World Bank population and GDP per capita
+EDA/                     exploratory notebooks and missingness analysis
+Hypothesen/              hypothesis notebooks and short READMEs
+output_csv_files/        processed tables used for maps and models
+Output_gifs/             exported animated visualizations (GIFs)
+output/                  exported model figures (PNGs)
 
-Regression.ipynb regression analysis
-Panelmodell.ipynb fixed effects panel model
-Static_flowmaps.ipynb static maps
-Dynamic_Flowmaps.ipynb animated maps plus GIF export
+Regression.ipynb         regression analysis
+Panelmodell.ipynb        fixed effects panel model
+Static_flowmaps.ipynb    static maps
+Dynamic_Flowmaps.ipynb   animated maps and GIF export
 geodata_preperation.ipynb geodata preprocessing
-Time_Series.ipynb time series analysis
+Time_Series.ipynb        time series analysis
 
 ## Contact
 
-Torsten Schmälzle  
+Torsten Schmälzle
 GitHub: https://github.com/torstenschmaelzle
+```
