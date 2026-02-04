@@ -148,8 +148,13 @@ Dynamic_Flowmaps.ipynb   animated maps and GIF export
 geodata_preperation.ipynb geodata preprocessing
 Time_Series.ipynb        time series analysis
 
+```
+
 ## Contact
 
 Torsten Schmälzle
 GitHub: https://github.com/torstenschmaelzle
+
+```
+
 ```
