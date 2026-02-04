@@ -2,26 +2,17 @@
 
 This repository analyzes global refugee and asylum seeker flows using UNHCR time series data (1951–2016), enriched with World Bank indicators (population and GDP per capita). The focus is on a clean end-to-end workflow: data preparation, feature engineering, exploratory analysis, geospatial visualization, hypothesis testing, regression, and fixed-effects panel modeling.
 
-## What this demonstrates (for Data Science / Statistics roles)
-
-- **Data wrangling:** harmonizing country identifiers across UNHCR, World Bank, and GeoJSON sources
-- **Feature engineering:** building comparable per-capita metrics (per 1,000 inhabitants)
-- **EDA & visualization:** time trends + geospatial flow visualizations (static and animated)
-- **Statistical inference:** hypothesis testing, regression, and **fixed-effects panel models**
-- **Methodological judgment:** transparent decisions around missingness and heavy-tailed data
-
----
-
 ## Quick preview of results
 
 ### Flow visualizations (GIFs)
 
 <p float="left">
-  <img src="Output_gifs/global_flowmap_2016.gif" width="49%" />
-  <img src="Output_gifs/inflow_heatmap.gif" width="49%" />
+  <img src="Output_gifs/global_flowmap_2016.gif" width="98%" />
+  
 </p>
 <p float="left">
   <img src="Output_gifs/outflow_heatmap.gif" width="49%" />
+  <img src="Output_gifs/inflow_heatmap.gif" width="49%" />
 </p>
 
 **What you’re seeing:**
